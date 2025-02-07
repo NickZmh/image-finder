@@ -9,34 +9,22 @@ import {
   CardMedia,
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { unsplashService } from '../../services'
-import { useRedirectOnInvalidUserData } from '../../hooks'
+
+import { useFetchImage } from '../../hooks'
+import { ImageNotFound } from '../common/ImageNotFound'
+import { FetchError } from '../common'
 
 export const ImageViewer = () => {
   const { userData, setUserData } = useAppContext()
   const navigate = useNavigate()
-  const [imageUrl, setImageUrl] = useState(null)
-  const [loading, setLoading] = useState(false)
 
-  useRedirectOnInvalidUserData(userData)
+  const { imageUrl, isLoading, error, fetchImage } = useFetchImage()
 
-  const fetchImage = async (searchCategory) => {
-    if (!searchCategory) return
-    setLoading(true)
-
-    try {
-      const image = await unsplashService.fetchRandomImage(searchCategory)
-
-      if (image) {
-        setImageUrl(image)
-        setUserData((prev) => ({ ...prev, imageUrl: image }))
-      }
-    } catch (error) {
-      console.error('Error fetching image:', error)
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    if (imageUrl) {
+      setUserData((prev) => ({ ...prev, imageUrl: imageUrl }))
     }
-  }
+  }, [imageUrl])
 
   useEffect(() => {
     if (!userData.imageUrl && userData.category) {
@@ -64,48 +52,73 @@ export const ImageViewer = () => {
             Go Back
           </Button>
         </Box>
-        <Typography variant="h5" mb={2}>
-          Choose an Image
-        </Typography>
-
         <Box
           display="flex"
-          gap={2}
           alignItems="center"
+          flexDirection="column"
           justifyContent="center"
-          sx={{ width: '100%', height: '490px' }}
+          sx={{ width: '100%', minHeight: '490px' }}
         >
-          {loading ? (
-            <CircularProgress />
-          ) : (
-            <CardMedia
-              component="img"
-              height="100%"
-              image={imageUrl || userData.imageUrl}
-              alt="Unsplash Image"
-            />
-          )}
-        </Box>
-        <Box mt={2} display="flex" gap={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ mt: '16px', pt: '16px', pb: '16px' }}
-            onClick={() => {
-              setUserData({ ...userData, imageUrl })
-              navigate('/confirm')
-            }}
+          <Box
+            display="flex"
+            alignItems="center"
+            flexDirection="column"
+            justifyContent="center"
+            sx={{ width: '100%' }}
           >
-            Accept
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            sx={{ mt: '16px', pt: '16px', pb: '16px' }}
-            onClick={() => fetchImage(userData.category)}
-          >
-            Reject
-          </Button>
+            <Typography variant="h5" mb={2}>
+              Choose an Image
+            </Typography>
+            <Box
+              display="flex"
+              gap={2}
+              alignItems="center"
+              justifyContent="center"
+              sx={{ width: '100%', height: '490px' }}
+            >
+              {isLoading && <CircularProgress />}
+              {!!imageUrl && !error && !isLoading && (
+                <CardMedia
+                  component="img"
+                  height="100%"
+                  image={imageUrl || userData.imageUrl}
+                  alt="Unsplash Image"
+                />
+              )}
+
+              {!imageUrl && !isLoading && !error && <ImageNotFound />}
+              {!isLoading && error && (
+                <FetchError
+                  error={error}
+                  onRetry={() => fetchImage(userData.category)}
+                />
+              )}
+            </Box>
+
+            <Box mt={2} display="flex" gap={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ mt: '16px', pt: '16px', pb: '16px' }}
+                onClick={() => {
+                  setUserData({ ...userData, imageUrl })
+                  navigate('/confirm')
+                }}
+                disabled={!imageUrl || !userData.imageUrl}
+              >
+                Accept
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                sx={{ mt: '16px', pt: '16px', pb: '16px' }}
+                onClick={() => fetchImage(userData.category)}
+                disabled={!imageUrl || !userData.imageUrl}
+              >
+                Reject
+              </Button>
+            </Box>
+          </Box>
         </Box>
       </Box>
     </Box>

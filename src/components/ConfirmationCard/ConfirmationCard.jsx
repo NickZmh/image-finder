@@ -10,13 +10,11 @@ import {
   Box,
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { useRedirectOnInvalidUserData } from '../../hooks'
+import { ImageNotFound } from '../common'
 
 export const ConfirmationCard = () => {
   const { userData } = useAppContext()
   const navigate = useNavigate()
-
-  useRedirectOnInvalidUserData(userData, () => navigate('/'))
 
   return (
     <>
@@ -61,6 +59,18 @@ export const ConfirmationCard = () => {
                 </CardContent>
               </CardActionArea>
             </Card>
+          )}
+
+          {!userData.imageUrl && (
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              sx={{ minHeight: '490px' }}
+            >
+              <ImageNotFound />
+            </Box>
           )}
         </Box>
       </Box>
