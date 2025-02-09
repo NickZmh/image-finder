@@ -1,31 +1,34 @@
 import { useState, useCallback } from 'react'
 import { unsplashService } from '../services'
+import { LOCALIZATION } from '../constants'
 
 export const useFetchImage = () => {
-  const [imageUrl, setImageUrl] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchImage = useCallback(
-    async (searchCategory) => {
+    async (searchCategory: string) => {
       if (!searchCategory) return
       setIsLoading(true)
       setError(null)
 
       try {
-        const image = await unsplashService.fetchRandomImage(searchCategory)
+        const image: string | null = await unsplashService.fetchRandomImage(
+          searchCategory,
+        )
 
         if (image) {
           setImageUrl(image)
         }
       } catch (error) {
         console.error('Error fetching image:', error)
-        setError('Failed to load the image. Please try again.')
+        setError(LOCALIZATION.errorFetchingImage)
       } finally {
         setIsLoading(false)
       }
     },
-    [setImageUrl, setImageUrl],
+    [setImageUrl, setIsLoading, setError],
   )
 
   return { imageUrl, isLoading, error, fetchImage }

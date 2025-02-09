@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import React from 'react'
+import { useEffect, useMemo } from 'react'
 import { useAppContext } from '../../context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -11,26 +12,34 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 import { useFetchImage } from '../../hooks'
-import { ImageNotFound } from '../common/ImageNotFound'
-import { FetchError } from '../common'
+import { ImageNotFound, FetchError } from '../common'
+import { LOCALIZATION } from '../../constants'
 
-export const ImageViewer = () => {
+export const ImageViewer: React.FC = () => {
   const { userData, setUserData } = useAppContext()
   const navigate = useNavigate()
 
   const { imageUrl, isLoading, error, fetchImage } = useFetchImage()
 
-  useEffect(() => {
-    if (imageUrl) {
-      setUserData((prev) => ({ ...prev, imageUrl: imageUrl }))
-    }
-  }, [imageUrl])
+  const category = useMemo(
+    () => userData.category || userData.customCategory,
+    [userData.category, userData.customCategory],
+  )
 
   useEffect(() => {
-    if (!userData.imageUrl && userData.category) {
-      fetchImage(userData.category)
+    if (imageUrl && imageUrl !== userData.imageUrl) {
+      setUserData((prev) => ({ ...prev, imageUrl }))
     }
-  }, [userData.imageUrl, userData.category])
+  }, [imageUrl, userData.imageUrl, setUserData])
+
+  useEffect(() => {
+    if (!userData.imageUrl && category) {
+      fetchImage(category)
+    }
+  }, [userData.imageUrl, category])
+
+  const shouldDisplayImageNotFound =
+    !userData.imageUrl && !imageUrl && !category && !isLoading && !error
 
   return (
     <Box display="flex" justifyContent="center">
@@ -45,11 +54,11 @@ export const ImageViewer = () => {
         <Box display="flex" justifyContent="start" mb={4} width="100%">
           <Button
             variant="outlined"
-            color="default"
+            color="primary"
             startIcon={<ArrowBackIcon />}
             onClick={() => navigate(-1)}
           >
-            Go Back
+            {LOCALIZATION.goBack}
           </Button>
         </Box>
         <Box
@@ -67,7 +76,7 @@ export const ImageViewer = () => {
             sx={{ width: '100%' }}
           >
             <Typography variant="h5" mb={2}>
-              Choose an Image
+              {LOCALIZATION.chooseImage}
             </Typography>
             <Box
               display="flex"
@@ -77,7 +86,8 @@ export const ImageViewer = () => {
               sx={{ width: '100%', height: '490px' }}
             >
               {isLoading && <CircularProgress />}
-              {!!imageUrl && !error && !isLoading && (
+
+              {userData.imageUrl && !isLoading && !error && (
                 <CardMedia
                   component="img"
                   height="100%"
@@ -86,15 +96,15 @@ export const ImageViewer = () => {
                 />
               )}
 
-              {!imageUrl && !isLoading && !error && <ImageNotFound />}
               {!isLoading && error && (
                 <FetchError
                   error={error}
                   onRetry={() => fetchImage(userData.category)}
                 />
               )}
-            </Box>
 
+              {shouldDisplayImageNotFound && <ImageNotFound />}
+            </Box>
             <Box mt={2} display="flex" gap={2}>
               <Button
                 variant="contained"
@@ -104,18 +114,18 @@ export const ImageViewer = () => {
                   setUserData({ ...userData, imageUrl })
                   navigate('/confirm')
                 }}
-                disabled={!imageUrl || !userData.imageUrl}
+                disabled={!userData.imageUrl}
               >
-                Accept
+                {LOCALIZATION.accept}
               </Button>
               <Button
                 variant="contained"
                 color="secondary"
                 sx={{ mt: '16px', pt: '16px', pb: '16px' }}
-                onClick={() => fetchImage(userData.category)}
-                disabled={!imageUrl || !userData.imageUrl}
+                onClick={() => fetchImage(category)}
+                disabled={!userData.imageUrl}
               >
-                Reject
+                {LOCALIZATION.reject}
               </Button>
             </Box>
           </Box>

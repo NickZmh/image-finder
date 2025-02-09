@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context'
 import { Container, InputLabel, FormControl } from '@mui/material'
@@ -10,28 +10,44 @@ import {
   Box,
   Typography,
 } from '@mui/material'
+import { LOCALIZATION } from '../../constants'
 
-const CATEGORY_OPTIONS = ['Travel', 'Cars', 'Wildlife', 'Technology', 'Other']
+interface FormInterface {
+  name: string
+  surname: string
+  category: string
+  customCategory: string
+}
 
-export const Home = () => {
+const CATEGORY_OPTIONS: string[] = [
+  'Travel',
+  'Cars',
+  'Wildlife',
+  'Technology',
+  'Other',
+]
+
+const initialFormState = {
+  name: '',
+  surname: '',
+  category: '',
+  customCategory: '',
+}
+
+export const Home: React.FC = () => {
   const navigate = useNavigate()
   const { setUserData } = useAppContext()
-  const [form, setForm] = useState({
-    name: '',
-    surname: '',
-    category: '',
-    customCategory: '',
-  })
+  const [form, setForm] = useState<FormInterface>(initialFormState)
 
-  const isOtherCategory = form.category === 'Other'
+  const isOtherCategory: boolean = form.category === 'Other'
 
-  const isFormValid =
-    form.name.trim() &&
-    form.surname.trim() &&
-    form.category &&
-    (form.category !== 'Other' || form.customCategory.trim())
+  const isFormValid: boolean =
+    !!form.name.trim() &&
+    !!form.surname.trim() &&
+    !!form.category &&
+    (!isOtherCategory || !!form.customCategory.trim())
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLButtonElement>) => {
     e.preventDefault()
     const selectedCategory = isOtherCategory
       ? form.customCategory
@@ -40,13 +56,6 @@ export const Home = () => {
     setUserData((prev) => ({ ...prev, ...form, category: selectedCategory }))
     navigate('/image')
   }
-
-  useEffect(() => {
-    setUserData((prevState) => ({
-      ...prevState,
-      imageUrl: '',
-    }))
-  }, [])
 
   return (
     <>
@@ -59,13 +68,15 @@ export const Home = () => {
           sx={{ maxWidth: 480, margin: 'auto' }}
         >
           <Typography variant="h4" mb={2}>
-            Enter Your Details
+            {LOCALIZATION.enterYourDetails}
           </Typography>
           <TextField
+            autoFocus
             label="Name"
             fullWidth
             margin="normal"
             required
+            value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
           <TextField
@@ -73,6 +84,7 @@ export const Home = () => {
             fullWidth
             margin="normal"
             required
+            value={form.surname}
             onChange={(e) => setForm({ ...form, surname: e.target.value })}
           />
           <FormControl fullWidth sx={{ mt: '16px', mb: '8px' }}>
@@ -83,7 +95,6 @@ export const Home = () => {
               labelId="category-label"
               id="category-label"
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              margin="normal"
               label="Select Option"
             >
               {CATEGORY_OPTIONS.map((category) => (
@@ -98,6 +109,7 @@ export const Home = () => {
               label="Custom Category *"
               fullWidth
               margin="normal"
+              value={form.customCategory}
               onChange={(e) =>
                 setForm({ ...form, customCategory: e.target.value })
               }
@@ -112,7 +124,7 @@ export const Home = () => {
             onClick={handleSubmit}
             disabled={!isFormValid}
           >
-            Find Image
+            {LOCALIZATION.findImageButton}
           </Button>
         </Box>
       </Container>

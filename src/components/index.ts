@@ -1,3 +1,3 @@
-export * from './Home/Home.jsx'
+export * from './Home/'
 export * from './ImageViewer'
 export * from './ConfirmationCard'

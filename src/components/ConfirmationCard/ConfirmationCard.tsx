@@ -11,8 +11,9 @@ import {
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { ImageNotFound } from '../common'
+import { LOCALIZATION } from '../../constants'
 
-export const ConfirmationCard = () => {
+export const ConfirmationCard: React.FC = () => {
   const { userData } = useAppContext()
   const navigate = useNavigate()
 
@@ -30,11 +31,10 @@ export const ConfirmationCard = () => {
           <Box display="flex" justifyContent="start" mb={4} width="100%">
             <Button
               variant="outlined"
-              color="default"
               startIcon={<ArrowBackIcon />}
               onClick={() => navigate(-1)}
             >
-              Go Back
+              {LOCALIZATION.goBack}
             </Button>
           </Box>
 

@@ -1,9 +1,9 @@
 import { ThemeProvider, CssBaseline, createTheme } from '@mui/material'
 import './App.css'
-import AppRouter from './Router'
+import { AppRouter } from './router'
 import { AppProvider } from './context'
 
-function App() {
+const App: React.FC = () => {
   const theme = createTheme()
   return (
     <AppProvider>

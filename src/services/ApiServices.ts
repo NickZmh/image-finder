@@ -1,5 +1,12 @@
+interface UnsplashResponse {
+  urls?: {
+    regular?: string
+  }
+}
+
 class ApiService {
-  constructor(apiKey) {
+  private apiKey: string
+  constructor(apiKey: string) {
     if (!apiKey) {
       throw new Error('ApiService requires  API key.')
     }
@@ -7,7 +14,7 @@ class ApiService {
     this.apiKey = apiKey
   }
 
-  async fetchRandomImage(query) {
+  async fetchRandomImage(query: string): Promise<string | null> {
     if (!query)
       throw new Error('Query parameter is required for fetching images.')
 
@@ -15,10 +22,11 @@ class ApiService {
       const response = await fetch(
         `https://api.unsplash.com/photos/random?query=${query}&client_id=${this.apiKey}`,
       )
+
       if (!response.ok) {
         throw new Error(`API error: ${response.statusText}`)
       }
-      const data = await response.json()
+      const data: UnsplashResponse = await response.json()
       return data?.urls?.regular || null
     } catch (error) {
       console.error('Error fetching image:', error)
@@ -27,6 +35,6 @@ class ApiService {
   }
 }
 
-const UNSPLASH_API_KEY = import.meta.env.VITE_UNSPLASH_API_KEY
+const UNSPLASH_API_KEY: string = import.meta.env.VITE_UNSPLASH_API_KEY as string
 
 export const unsplashService = new ApiService(UNSPLASH_API_KEY)

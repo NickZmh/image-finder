@@ -4,9 +4,9 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom'
-import { Home, ImageViewer, ConfirmationCard } from './components'
+import { Home, ImageViewer, ConfirmationCard } from '../components'
 
-const AppRouter = () => {
+export const AppRouter: React.FC = () => {
   return (
     <Router>
       <Routes>
@@ -18,5 +18,3 @@ const AppRouter = () => {
     </Router>
   )
 }
-
-export default AppRouter
